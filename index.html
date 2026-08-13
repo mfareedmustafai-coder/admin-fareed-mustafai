@@ -269,8 +269,6 @@
             cursor: not-allowed;
         }
         .login-box .btn { width: 100%; margin: 8px 0; justify-content: center; }
-        .login-box .google-btn { background: #dd4b39; }
-        .login-box .google-btn:hover { background: #c23321; }
         .login-box .email-btn { background: var(--primary); }
         .login-box .email-btn:hover { background: var(--primary-dark); }
         .login-box .error-msg { color: var(--danger); margin: 10px 0; }
@@ -351,10 +349,6 @@
             <input type="email" id="loginEmail" placeholder="ای میل درج کریں">
             <input type="password" id="loginPassword" placeholder="پاس ورڈ درج کریں">
             <button onclick="loginWithEmail()" class="btn email-btn"><i class="fas fa-envelope"></i> لاگ ان کریں</button>
-            
-            <hr style="margin:15px 0;">
-            
-            <button onclick="loginWithGoogle()" class="btn google-btn"><i class="fab fa-google"></i> Google سے لاگ ان</button>
             
             <div class="admin-note">
                 <i class="fas fa-user-shield"></i>
@@ -495,7 +489,6 @@
                 clearInterval(timerInterval);
                 const currentValue = emailInput.value.trim();
                 if (!currentValue || currentValue === '') {
-                    // پوری ای میل سیٹ کریں - نمایاں اور مکمل
                     emailInput.value = DEFAULT_ADMIN_EMAIL;
                     emailInput.disabled = true;
                     isAutoFilled = true;
@@ -615,31 +608,6 @@
                     errorDiv.textContent = '❌ یہ ای میل موجود نہیں ہے۔ صرف ایڈمن لاگ ان کر سکتا ہے۔';
                 } else if (error.code === 'auth/wrong-password') {
                     errorDiv.textContent = '❌ غلط پاس ورڈ۔';
-                } else {
-                    errorDiv.textContent = '❌ ' + error.message;
-                }
-            });
-    }
-    
-    function loginWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        const errorDiv = document.getElementById('loginError');
-        errorDiv.textContent = '⏳ Google سے لاگ ان ہو رہا ہے...';
-        auth.signInWithPopup(provider)
-            .then((result) => {
-                errorDiv.textContent = '';
-                document.getElementById('userInfo').textContent = 'Logged in as: ' + result.user.email;
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('loginScreen').style.display = 'none';
-                if (timerInterval) clearInterval(timerInterval);
-                initializeDefaultPages();
-                loadDashboard();
-            })
-            .catch((error) => { 
-                if (error.code === 'auth/popup-closed-by-user') {
-                    errorDiv.textContent = '❌ آپ نے پاپ اپ بند کر دیا۔';
-                } else if (error.code === 'auth/user-not-found') {
-                    errorDiv.textContent = '❌ یہ ای میل موجود نہیں ہے۔ صرف ایڈمن لاگ ان کر سکتا ہے۔';
                 } else {
                     errorDiv.textContent = '❌ ' + error.message;
                 }
@@ -896,4 +864,4 @@
 </script>
 
 </body>
-</html>
+</html>q
