@@ -195,6 +195,62 @@
             text-align: center;
             border: 2px solid var(--primary);
         }
+        .login-box h2 { border-bottom: none; padding-bottom: 0; }
+        .login-box .timer-info {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin: 10px 0;
+            padding: 8px 12px;
+            background: var(--primary-light);
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+        }
+        .login-box .timer-info span {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .login-box .timer-info .highlight {
+            color: var(--danger);
+            font-weight: bold;
+        }
+        .login-box .email-display {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 3px solid var(--primary);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 15px 0;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            font-weight: bold;
+            direction: ltr;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,107,84,0.2);
+            word-break: break-all;
+        }
+        .login-box .email-display .badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 3px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .login-box .email-display .email-text {
+            font-size: 1.4rem;
+            color: #004d3d;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+        .login-box .email-display .email-icon {
+            color: var(--primary);
+            margin-left: 8px;
+            vertical-align: middle;
+        }
         .login-box input {
             width: 100%;
             padding: 12px 16px;
@@ -207,13 +263,28 @@
             color: var(--text);
         }
         .login-box input:focus { border-color: var(--primary); outline: none; }
+        .login-box input:disabled {
+            opacity: 0.7;
+            background: var(--border);
+            cursor: not-allowed;
+        }
         .login-box .btn { width: 100%; margin: 8px 0; justify-content: center; }
         .login-box .google-btn { background: #dd4b39; }
         .login-box .google-btn:hover { background: #c23321; }
         .login-box .email-btn { background: var(--primary); }
         .login-box .email-btn:hover { background: var(--primary-dark); }
         .login-box .error-msg { color: var(--danger); margin: 10px 0; }
-        .login-box .switch-link { color: var(--primary); cursor: pointer; text-decoration: underline; }
+        .login-box .admin-note {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--primary-light);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .login-box .admin-note i { margin-left: 8px; }
         
         .stat-cards {
             display: grid;
@@ -250,6 +321,9 @@
             .stat-cards { grid-template-columns: 1fr 1fr; }
             .item-card .item-actions { flex-direction: column; }
             .item-card .item-actions .btn { width: 100%; }
+            .login-box { margin: 20px auto; padding: 20px; }
+            .login-box .email-display { font-size: 1rem; padding: 12px; }
+            .login-box .email-display .email-text { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -257,44 +331,35 @@
 
 <div id="app">
     <!-- Login Screen -->
-    <div id="loginScreen" style="display:none;">
+    <div id="loginScreen" style="display:block;">
         <div class="login-box">
             <h2><i class="fas fa-lock"></i> Admin Login</h2>
-            <p style="color:var(--text-light);">ایڈمن پینل میں داخل ہونے کے لیے لاگ ان کریں</p>
+            <p style="color:var(--text-light);">صرف ایڈمن کے لیے مخصوص</p>
+            
+            <div id="timerInfo" class="timer-info">
+                ⏳ <span id="countdownTimer">20</span> سیکنڈ میں ای میل خودکار ہو جائے گی...
+            </div>
+            
+            <div id="emailDisplay" class="email-display">
+                <span class="badge"><i class="fas fa-robot"></i> آٹو</span>
+                <i class="fas fa-envelope email-icon"></i>
+                <span class="email-text" id="autoEmailText">mfareedmustafaiii@gmail.com</span>
+            </div>
+            
             <div id="loginError" class="error-msg"></div>
             
-            <input type="email" id="loginEmail" placeholder="ای میل">
-            <input type="password" id="loginPassword" placeholder="پاس ورڈ">
-            <button onclick="loginWithEmail()" class="btn email-btn"><i class="fas fa-envelope"></i> ای میل سے لاگ ان</button>
+            <input type="email" id="loginEmail" placeholder="ای میل درج کریں">
+            <input type="password" id="loginPassword" placeholder="پاس ورڈ درج کریں">
+            <button onclick="loginWithEmail()" class="btn email-btn"><i class="fas fa-envelope"></i> لاگ ان کریں</button>
             
             <hr style="margin:15px 0;">
             
             <button onclick="loginWithGoogle()" class="btn google-btn"><i class="fab fa-google"></i> Google سے لاگ ان</button>
             
-            <p style="margin-top:15px; color:var(--text-light);">
-                  
-                <span onclick="showRegister()" class="switch-link"> </span>
-            </p>
-        </div>
-    </div>
-    
-    <!-- Register Screen -->
-    <div id="registerScreen" style="display:none;">
-        <div class="login-box">
-            <h2><i class="fas fa-user-plus"></i> Register</h2>
-            <p style="color:var(--text-light);">  </p>
-            <div id="registerError" class="error-msg"></div>
-            
-            <input type="email" id="registerEmail" placeholder="ای میل">
-            <input type="password" id="registerPassword" placeholder="پاس ورڈ (6 حروف سے زیادہ)">
-            <button onclick="registerUser()" class="btn email-btn"><i class="fas fa-user-plus"></i> رجسٹر کریں</button>
-            
-            <hr style="margin:15px 0;">
-            
-            <p style="margin-top:15px; color:var(--text-light);">
-                
-                <span onclick="showLogin()" class="switch-link">لاگ ان کریں</span>
-            </p>
+            <div class="admin-note">
+                <i class="fas fa-user-shield"></i>
+                ⚠️ یہ صرف ایڈمن کے لیے ہے۔ صرف ایڈمن اپنی ای میل اور پاس ورڈ کے ذریعے اسے کھول سکتا ہے۔
+            </div>
         </div>
     </div>
     
@@ -399,6 +464,98 @@
     const database = firebase.database();
     const auth = firebase.auth();
 
+    // ========== DEFAULT ADMIN EMAIL ==========
+    const DEFAULT_ADMIN_EMAIL = "mfareedmustafaiii@gmail.com";
+
+    // ========== AUTO FILL TIMER ==========
+    let autoFillTimer = 20;
+    let timerInterval = null;
+    let isAutoFilled = false;
+
+    function startAutoFillTimer() {
+        const timerDisplay = document.getElementById('countdownTimer');
+        const emailInput = document.getElementById('loginEmail');
+        const emailDisplay = document.getElementById('emailDisplay');
+        const autoText = document.getElementById('autoEmailText');
+        const timerInfo = document.getElementById('timerInfo');
+        
+        if (auth.currentUser) {
+            clearInterval(timerInterval);
+            timerInfo.style.display = 'none';
+            return;
+        }
+
+        timerInterval = setInterval(() => {
+            autoFillTimer--;
+            if (timerDisplay) {
+                timerDisplay.textContent = autoFillTimer;
+            }
+            
+            if (autoFillTimer <= 0) {
+                clearInterval(timerInterval);
+                const currentValue = emailInput.value.trim();
+                if (!currentValue || currentValue === '') {
+                    // پوری ای میل سیٹ کریں - نمایاں اور مکمل
+                    emailInput.value = DEFAULT_ADMIN_EMAIL;
+                    emailInput.disabled = true;
+                    isAutoFilled = true;
+                    autoText.textContent = DEFAULT_ADMIN_EMAIL;
+                    emailDisplay.style.display = 'block';
+                    timerInfo.innerHTML = '✅ <span style="color:var(--success); font-weight:bold;">ای میل خودکار ہو گئی!</span> اب صرف پاس ورڈ درج کریں۔';
+                    timerInfo.style.borderColor = 'var(--success)';
+                    
+                    document.getElementById('loginPassword').focus();
+                } else {
+                    timerInfo.style.display = 'none';
+                }
+            }
+        }, 1000);
+    }
+
+    // ========== EVENT LISTENERS ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailInput = document.getElementById('loginEmail');
+        const timerInfo = document.getElementById('timerInfo');
+        
+        emailInput.addEventListener('input', function() {
+            if (this.value.trim() !== '' && timerInterval) {
+                clearInterval(timerInterval);
+                timerInfo.innerHTML = '✏️ آپ نے خود ای میل درج کی ہے۔ ٹائمر روک دیا گیا۔';
+                timerInfo.style.borderColor = 'var(--secondary)';
+                this.disabled = false;
+                isAutoFilled = false;
+                document.getElementById('emailDisplay').style.display = 'none';
+            }
+        });
+        
+        emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginPassword').focus();
+            }
+        });
+        
+        document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loginWithEmail();
+            }
+        });
+        
+        document.getElementById('loginPassword').addEventListener('focus', function() {
+            const emailInput = document.getElementById('loginEmail');
+            if (!emailInput.value.trim() && !isAutoFilled) {
+                emailInput.value = DEFAULT_ADMIN_EMAIL;
+                emailInput.disabled = true;
+                isAutoFilled = true;
+                document.getElementById('autoEmailText').textContent = DEFAULT_ADMIN_EMAIL;
+                document.getElementById('emailDisplay').style.display = 'block';
+                const timerInfo = document.getElementById('timerInfo');
+                timerInfo.innerHTML = '✅ <span style="color:var(--success); font-weight:bold;">ای میل خودکار ہو گئی!</span>';
+                timerInfo.style.borderColor = 'var(--success)';
+                if (timerInterval) clearInterval(timerInterval);
+            }
+        });
+    });
+
     // ========== ALL DEFAULT PAGES (26 PAGES) ==========
     const defaultPages = {
         "about": { title: "🕋 About Us", content: "<h2>🕋 About Us</h2><p>Welcome to Fareed Mustafai...</p>" },
@@ -430,45 +587,18 @@
     };
 
     // ========== AUTH FUNCTIONS ==========
-    function showLogin() {
-        document.getElementById('loginScreen').style.display = 'block';
-        document.getElementById('registerScreen').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'none';
-    }
-    
-    function showRegister() {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('registerScreen').style.display = 'block';
-        document.getElementById('adminPanel').style.display = 'none';
-    }
-    
-    function registerUser() {
-        const email = document.getElementById('registerEmail').value.trim();
-        const password = document.getElementById('registerPassword').value.trim();
-        const errorDiv = document.getElementById('registerError');
-        if (!email || !password) { errorDiv.textContent = '❌ براہِ کرم ای میل اور پاس ورڈ درج کریں۔'; return; }
-        if (password.length < 6) { errorDiv.textContent = '❌ پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے۔'; return; }
-        errorDiv.textContent = '⏳ رجسٹر ہو رہا ہے...';
-        auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                errorDiv.textContent = '✅ اکاؤنٹ کامیابی سے بن گیا!';
-                setTimeout(() => {
-                    document.getElementById('userInfo').textContent = 'Logged in as: ' + userCredential.user.email;
-                    document.getElementById('adminPanel').style.display = 'block';
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('registerScreen').style.display = 'none';
-                    initializeDefaultPages();
-                    loadDashboard();
-                }, 1000);
-            })
-            .catch((error) => { errorDiv.textContent = '❌ ' + error.message; });
-    }
-    
     function loginWithEmail() {
-        const email = document.getElementById('loginEmail').value.trim();
+        const emailInput = document.getElementById('loginEmail');
+        const email = emailInput.value.trim();
         const password = document.getElementById('loginPassword').value.trim();
         const errorDiv = document.getElementById('loginError');
-        if (!email || !password) { errorDiv.textContent = '❌ براہِ کرم ای میل اور پاس ورڈ درج کریں۔'; return; }
+        errorDiv.textContent = '';
+        
+        if (!email || !password) { 
+            if (!email) errorDiv.textContent = '❌ براہِ کرم ای میل درج کریں۔';
+            else errorDiv.textContent = '❌ براہِ کرم پاس ورڈ درج کریں۔';
+            return; 
+        }
         errorDiv.textContent = '⏳ لاگ ان ہو رہا ہے...';
         auth.signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
@@ -476,11 +606,19 @@
                 document.getElementById('userInfo').textContent = 'Logged in as: ' + userCredential.user.email;
                 document.getElementById('adminPanel').style.display = 'block';
                 document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('registerScreen').style.display = 'none';
+                if (timerInterval) clearInterval(timerInterval);
                 initializeDefaultPages();
                 loadDashboard();
             })
-            .catch((error) => { errorDiv.textContent = '❌ ' + error.message; });
+            .catch((error) => { 
+                if (error.code === 'auth/user-not-found') {
+                    errorDiv.textContent = '❌ یہ ای میل موجود نہیں ہے۔ صرف ایڈمن لاگ ان کر سکتا ہے۔';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorDiv.textContent = '❌ غلط پاس ورڈ۔';
+                } else {
+                    errorDiv.textContent = '❌ ' + error.message;
+                }
+            });
     }
     
     function loginWithGoogle() {
@@ -493,20 +631,37 @@
                 document.getElementById('userInfo').textContent = 'Logged in as: ' + result.user.email;
                 document.getElementById('adminPanel').style.display = 'block';
                 document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('registerScreen').style.display = 'none';
+                if (timerInterval) clearInterval(timerInterval);
                 initializeDefaultPages();
                 loadDashboard();
             })
-            .catch((error) => { errorDiv.textContent = '❌ ' + error.message; });
+            .catch((error) => { 
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorDiv.textContent = '❌ آپ نے پاپ اپ بند کر دیا۔';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorDiv.textContent = '❌ یہ ای میل موجود نہیں ہے۔ صرف ایڈمن لاگ ان کر سکتا ہے۔';
+                } else {
+                    errorDiv.textContent = '❌ ' + error.message;
+                }
+            });
     }
     
     function logoutUser() {
         auth.signOut().then(() => {
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('registerScreen').style.display = 'none';
             document.getElementById('loginError').textContent = '';
             document.getElementById('userInfo').textContent = '';
+            autoFillTimer = 20;
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginEmail').disabled = false;
+            document.getElementById('emailDisplay').style.display = 'none';
+            const timerInfo = document.getElementById('timerInfo');
+            timerInfo.style.display = 'block';
+            timerInfo.innerHTML = '⏳ <span id="countdownTimer">20</span> سیکنڈ میں ای میل خودکار ہو جائے گی...';
+            timerInfo.style.borderColor = 'var(--primary)';
+            document.getElementById('loginPassword').value = '';
+            startAutoFillTimer();
         });
     }
     
@@ -545,13 +700,13 @@
             document.getElementById('userInfo').textContent = 'Logged in as: ' + user.email;
             document.getElementById('adminPanel').style.display = 'block';
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('registerScreen').style.display = 'none';
+            if (timerInterval) clearInterval(timerInterval);
             initializeDefaultPages();
             loadDashboard();
         } else {
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('registerScreen').style.display = 'none';
+            startAutoFillTimer();
         }
     });
     
@@ -616,7 +771,6 @@
     
     // ========== LOAD POSTS AND PAGES ==========
     function loadPostsAndPages() {
-        // Load posts
         database.ref('posts').orderByChild('timestamp').once('value').then((snapshot) => {
             const posts = snapshot.val() || {};
             const container = document.getElementById('postsList');
@@ -642,7 +796,6 @@
             container.innerHTML = html;
         });
         
-        // Load pages
         database.ref('pages').once('value').then((snapshot) => {
             const pages = snapshot.val() || {};
             const container = document.getElementById('pagesList');
@@ -733,6 +886,12 @@
     if (savedTheme === 'dark') {
         darkMode = true;
         document.body.classList.add('dark-mode');
+    }
+
+    if (!auth.currentUser) {
+        setTimeout(() => {
+            startAutoFillTimer();
+        }, 500);
     }
 </script>
 
