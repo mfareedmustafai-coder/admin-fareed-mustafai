@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ایڈمن پینل - M.FAREED MUSTAFAI</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #006b54;
+            --primary-dark: #004d3d;
+            --primary-soft: #eef9f6;
+            --gold: #d4af37;
+            --gold-light: #ffd700;
+            --secondary: #f0ad4e;
+            --danger: #d9534f;
+            --success: #5cb85c;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #222222;
+            --text-light: #666666;
+            --border: #e0e8e5;
+            --shadow: 0 4px 20px rgba(0,77,61,0.08);
+            --radius: 14px;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            padding: 15px;
+            text-align: right;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            --bg: #0f1a17;
+            --card-bg: #162622;
+            --text: #e2e8e5;
+            --text-light: #9db2aa;
+            --border: #223c35;
+            --shadow: 0 4px 20px rgba(0,0,0,0.5);
+            --primary-soft: #1a322c;
+        }
+        .site-header {
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+            padding: 25px 20px;
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .site-header h1 { 
+            color: var(--primary); 
+            font-size: 1.85rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        .site-header .badge-pro {
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            color: #000;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 800;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .post {
+            margin: 20px auto;
+            border: 1px solid var(--border);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            background: var(--card-bg);
+            border-radius: var(--radius);
+        }
+        h1, h2, h3 { 
+            color: var(--primary); 
+            border-bottom: 2px solid var(--primary-soft); 
+            padding-bottom: 10px; 
+            margin-bottom: 15px;
+        }
+        a { color: var(--primary); font-weight: bold; text-decoration: none; }
+        .nav {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 12px 18px;
+            text-align: center;
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px 14px;
+            border-radius: var(--radius);
+            box-shadow: 0 6px 20px rgba(0,77,61,0.25);
+            margin-bottom: 25px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .nav a:hover { background: rgba(255,255,255,0.22); transform: translateY(-2px); }
+        .nav a.active { background: var(--gold-light); color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 10px rgba(212,175,55,0.4); }
+        .nav a.logout-btn { background: var(--danger); margin-right: auto; }
+        .nav a.logout-btn:hover { background: #c9302c; }
+        .nav a.theme-toggle { background: rgba(255,255,255,0.15); }
+        hr { border: 0; border-top: 1px solid var(--border); margin: 25px 0; }
+        
+        .admin-panel {
+            background: var(--primary-soft);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .admin-panel input, .admin-panel textarea {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0 15px 0;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            text-align: right;
+            background: var(--card-bg);
+            color: var(--text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .admin-panel input:focus, .admin-panel textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,107,84,0.2);
+        }
+        .admin-panel textarea { min-height: 140px; resize: vertical; }
+        .admin-panel label { font-weight: 700; color: var(--primary-dark); display: block; margin-top: 5px; }
+        
+        /* Media Tools Bar */
+        .media-toolbar {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .media-tool-btn {
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            border: 1px solid var(--primary);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .media-tool-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Live Preview Box */
+        .live-preview-box {
+            background: var(--card-bg);
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .live-preview-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .preview-thumbs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .preview-thumb-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .preview-thumb-card img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block;
+        }
+        .preview-thumb-card .thumb-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.75);
+            color: white;
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .preview-thumb-card .thumb-caption {
+            padding: 6px 8px;
+            font-size: 0.78rem;
+            color: var(--text);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn {
+            padding: 12px 26px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            transition: 0.3s;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.18); }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #449d44; }
+        .btn-warning { background: var(--secondary); color: #000; }
+        .btn-warning:hover { background: #ec971f; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #c9302c; }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #b8860b); color: #000; }
+        .btn-gold:hover { background: #b8860b; color: #fff; }
+        .btn-sm { padding: 6px 14px; font-size: 0.85rem; border-radius: 8px; }
+        
+        .item-list {
+            max-height: 550px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin: 10px 0;
+            background: var(--card-bg);
+        }
+        .item-list::-webkit-scrollbar { width: 8px; }
+        .item-list::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
+        .item-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        
+        .item-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            margin: 14px 0;
+            transition: 0.3s;
+        }
+        .item-card:hover { transform: translateX(-4px); box-shadow: var(--shadow); }
+        .item-card .item-title { font-weight: bold; color: var(--primary); font-size: 1.15rem; }
+        .item-card .item-content {
+            color: var(--text-light);
+            margin: 10px 0;
+            padding: 12px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            max-height: 180px;
+            overflow-y: auto;
+            line-height: 1.7;
+        }
+        .item-card .item-media-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .item-card .item-media-preview img {
+            width: 140px;
+            height: 85px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .item-card .item-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+        .item-card .item-meta { font-size: 0.82rem; color: var(--text-light); margin-top: 6px; }
+        
+        .login-box {
+            max-width: 440px;
+            margin: 50px auto;
+            padding: 35px 25px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 35px rgba(0,77,61,0.15);
+            text-align: center;
+            border: 2px solid var(--primary);
+        }
+        .login-box h2 { border-bottom: none; padding-bottom: 0; font-size: 1.6rem; }
+        .login-box .timer-info {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin: 12px 0;
+            padding: 8px 12px;
+            background: var(--primary-soft);
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+        }
+        .login-box .email-display {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 15px 0;
+            font-size: 1.15rem;
+            color: var(--primary-dark);
+            font-weight: bold;
+            direction: ltr;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,107,84,0.15);
+            word-break: break-all;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: right;
+            background: var(--card-bg);
+            color: var(--text);
+        }
+        .login-box input:focus { border-color: var(--primary); outline: none; }
+        .login-box input:disabled { opacity: 0.7; background: var(--border); cursor: not-allowed; }
+        .login-box .btn { width: 100%; margin: 8px 0; justify-content: center; }
+        .login-box .error-msg { color: var(--danger); margin: 10px 0; font-weight: bold; }
+        
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: 22px;
+            border-radius: var(--radius);
+            border: 2px solid var(--primary);
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card h3 { font-size: 2.6rem; color: var(--primary); border: none; padding: 0; margin-bottom: 4px; }
+        .stat-card p { color: var(--text-light); font-weight: 700; }
+        
+        /* Modal for adding media */
+        .admin-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 15px;
+        }
+        .admin-modal-overlay.active { display: flex; }
+        .admin-modal-box {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 100%;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 2px solid var(--primary);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: var(--card-bg);
+            margin-top: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            .post { padding: 15px; }
+            .nav a { font-size: 13px; padding: 6px 12px; }
+            .stat-cards { grid-template-columns: 1fr 1fr; }
+            .item-card .item-actions { flex-direction: column; }
+            .item-card .item-actions .btn { width: 100%; }
+            .login-box { margin: 20px auto; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Login Screen -->
+    <div id="loginScreen" style="display:block;">
+        <div class="login-box">
+            <h2><i class="fas fa-lock"></i> Admin Login</h2>
+            <p style="color:var(--text-light); margin-top:4px;">صرف ایڈمن M.FAREED MUSTAFAI کے لیے مخصوص</p>
+            
+            <div id="timerInfo" class="timer-info">
+                ⏳ <span id="countdownTimer" style="color:var(--primary); font-weight:bold; font-size:1.1rem;">20</span> سیکنڈ میں ای میل خودکار ہو جائے گی...
+            </div>
+            
+            <div id="emailDisplay" class="email-display">
+                <span style="background:var(--primary); color:white; padding:2px 10px; border-radius:15px; font-size:0.7rem; font-weight:bold; margin-left:8px;">آٹو</span>
+                <i class="fas fa-envelope" style="margin-left:6px;"></i>
+                <span id="autoEmailText">mfareedmustafaiii@gmail.com</span>
+            </div>
+            
+            <div id="loginError" class="error-msg"></div>
+            
+            <input type="email" id="loginEmail" placeholder="ای میل درج کریں">
+            <input type="password" id="loginPassword" placeholder="پاس ورڈ درج کریں">
+            <button onclick="loginWithEmail()" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> لاگ ان کریں</button>
+            
+            <div style="margin-top:18px; padding:12px; background:var(--primary-soft); border-radius:8px; font-size:0.85rem; color:var(--primary-dark); font-weight:600;">
+                <i class="fas fa-shield-alt"></i> ویب سائٹ اور ڈیٹا بیس کا محفوظ انتظامی پینل
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin Panel -->
+    <div id="adminPanel" style="display:none;">
+        <div class="site-header">
+            <h1>
+                <i class="fas fa-shield-halved"></i> 
+                Admin Portal - M.FAREED MUSTAFAI
+                <span class="badge-pro">PRO v3.0</span>
+            </h1>
+            <p style="color:var(--text-light); font-weight:600;">یوٹیوب خودکار تھمب نیلز اور لائیو اعلانات کے ساتھ مکمل کنٹرول</p>
+            <div id="userInfo" style="color:var(--primary); font-weight:bold; margin-top:6px; font-size:0.92rem;"></div>
+        </div>
+
+        <div class="nav">
+            <a href="#dashboard" class="active" onclick="showSection('dashboard')"><i class="fas fa-chart-pie"></i> ڈیش بورڈ</a>
+            <a href="#addpost" onclick="showSection('addpost')"><i class="fas fa-plus-circle"></i> پوسٹ شامل کریں</a>
+            <a href="#addpage" onclick="showSection('addpage')"><i class="fas fa-file-circle-plus"></i> نیا پیج بنائیں</a>
+            <a href="#announcements" onclick="showSection('announcements')"><i class="fas fa-bullhorn"></i> اہم اعلانات 📢</a>
+            <a href="#edititems" onclick="showSection('edititems')"><i class="fas fa-edit"></i> ✏️ اپڈیٹ و ایڈٹ کریں (Update)</a>
+            <a href="#" onclick="toggleTheme()" class="theme-toggle"><i class="fas fa-moon"></i> تھیم</a>
+            <a href="#" onclick="logoutUser()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> لاگ آؤٹ</a>
+            <a href="index.html" target="_blank" style="background:var(--gold); color:#000;"><i class="fas fa-globe"></i> ویب سائٹ دیکھیں</a>
+        </div>
+
+        <div class="container">
+            
+            <!-- ========== DASHBOARD ========== -->
+            <div id="section-dashboard" class="post">
+                <h2><i class="fas fa-chart-pie"></i> ڈیش بورڈ کی صورتحال</h2>
+                <p style="color:var(--text-light);">خوش آمدید! آپ کے پورٹل پر فائر بیس ریئل ٹائم ڈیٹا بیس کا ڈیٹا لائیو منسلک ہے۔</p>
+                <hr>
+                <div class="stat-cards">
+                    <div class="stat-card"><h3 id="postCount">0</h3><p><i class="fas fa-file-alt"></i> کل پوسٹس (Posts)</p></div>
+                    <div class="stat-card"><h3 id="pageCount">0</h3><p><i class="fas fa-file-code"></i> کل صفحات (Pages)</p></div>
+                    <div class="stat-card"><h3 id="announcementCount">0</h3><p><i class="fas fa-bullhorn"></i> جاری اعلانات</p></div>
+                </div>
+                
+                <div style="background:var(--primary-soft); border-right:4px solid var(--primary); padding:18px; border-radius:10px; margin-top:20px;">
+                    <h3 style="border:none; margin:0 0 8px 0; font-size:1.15rem; color:var(--primary);">💡 پرو ٹپس:</h3>
+                    <ul style="padding-right:20px; line-height:1.9; color:var(--text); font-size:0.95rem;">
+                        <li><strong>اہم اعلانات (Announcements):</strong> اوپر دیے گئے "اہم اعلانات 📢" ٹیب سے آپ ویب سائٹ کی اعلان پٹی میں ایک سے زائد جتنے مرضی اعلانات شامل اور ڈیلیٹ کر سکتے ہیں۔</li>
+                        <li><strong>10 سیکنڈ ویڈیو اپلوڈ:</strong> فون یا کمپیوٹر سے ویڈیو منتخب کریں، ٹھیک 10 سیکنڈ کا اسمارٹ ٹائمر چلے گا اور ویڈیو آٹو اٹیچ ہو جائے گی۔</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-top:20px;">
+                    <button onclick="loadDashboard()" class="btn btn-primary"><i class="fas fa-sync"></i> ریفریش ڈیٹا</button> <button onclick="showSection('edititems')" class="btn btn-warning" style="margin-right:10px; font-weight:bold;"><i class="fas fa-edit"></i> ✏️ کسی بھی پوسٹ یا پیج کو اپڈیٹ کریں (Update Item)</button> <button onclick="showSection('announcements')" class="btn btn-success" style="margin-right:10px; font-weight:bold;"><i class="fas fa-bullhorn"></i> 📢 اعلانات کا انتظام</button>
+                </div>
+            </div>
+            
+            <!-- ========== ADD POST ========== -->
+            <div id="section-addpost" class="post" style="display:none;">
+                <h2><i class="fas fa-plus-circle"></i> Add New Post (نئی پوسٹ شامل کریں)</h2>
+                <div style="background:var(--primary-soft); padding:10px 14px; border-radius:8px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><span><i class="fas fa-info-circle" style="color:var(--primary);"></i> کیا آپ کسی پہلے سے موجود پوسٹ کو تبدیل یا اپڈیٹ کرنا چاہتے ہیں؟</span><button type="button" onclick="showSection('edititems')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> ✏️ پرانی پوسٹ اپڈیٹ کریں (Update)</button></div>
+                <div class="admin-panel">
+                    <label><i class="fas fa-heading"></i> پوسٹ کا عنوان:</label>
+                    <input type="text" id="postTitle" placeholder="مثال: آج کی حدیث مبارکہ / نیا فتویٰ">
+                    
+                    <!-- Media Tools -->
+                    <div class="media-toolbar">
+                        <span style="font-size:0.85rem; font-weight:bold; color:var(--primary); margin-left:6px;">⚡ فوری میڈیا ٹولز:</span>
+                        <button type="button" class="media-tool-btn" onclick="openMediaModal('post', 'youtube')">
+                            <i class="fab fa-youtube" style="color:#ff0000;"></i> یوٹیوب ویڈیو لنک
+                        </button>
+                        <button type="button" class="media-tool-btn" onclick="openMediaModal('post', 'image_url')">
+                            <i class="fas fa-image" style="color:#006b54;"></i> تصویر کا لنک
+                        </button>
+                        <label class="media-tool-btn" style="cursor:pointer; margin:0;">
+                            <i class="fas fa-camera" style="color:#27ae60;"></i> گیلری سے فوٹو اپلوڈ
+                            <input type="file" accept="image/*" style="display:none;" onchange="handleFileUpload(event, 'postContent')">
+                        </label>
+                        <label class="media-tool-btn" style="cursor:pointer; margin:0; background:linear-gradient(135deg, #e3f2fd, #bbdefb); color:#0d47a1; border-color:#90caf9;">
+                            <i class="fas fa-video" style="color:#1976d2;"></i> فون گیلری سے ویڈیو اپلوڈ 🎬 (10s)
+                            <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*" style="display:none;" onchange="handleVideoUpload(event, 'postContent')">
+                        </label>
+                        <label class="media-tool-btn" style="cursor:pointer; margin:0; background:linear-gradient(135deg, #fff3e0, #ffe0b2); color:#b75300; border-color:#ffcc80;">
+                            <i class="fas fa-microphone-lines" style="color:#e65100;"></i> گیلری سے آڈیو / ریکارڈنگ اپلوڈ 🎙️ (MP3 & AAC)
+                            <input type="file" accept="audio/*,audio/mp3,audio/mpeg,audio/aac,audio/x-aac,audio/m4a,audio/x-m4a,audio/mp4,audio/wav,audio/ogg,.mp3,.aac,.m4a,.wav,.ogg" style="display:none;" onchange="handleAudioUpload(event, 'postContent')">
+                        </label>
+                    </div>
+
+                    <label><i class="fas fa-align-left"></i> پوسٹ کا مواد (تحریر، یوٹیوب لنکس یا تصاویر):</label>
+                    <textarea id="postContent" placeholder="پوسٹ کا مواد یہاں لکھیں یا یوٹیوب کا کوئی بھی لنک پیسٹ کریں..." oninput="updateLiveMediaPreview('postContent', 'postLivePreview')"></textarea>
+                    
+                    <!-- Live Thumbnail & Media Preview Box -->
+                    <div id="postLivePreview" class="live-preview-box" style="display:none;">
+                        <div class="live-preview-title"><i class="fas fa-magic"></i> خودکار تھمب نیل اور میڈیا لائیو پریویو:</div>
+                        <div class="preview-thumbs-grid" id="postLivePreviewGrid"></div>
+                    </div>
+
+                    <button onclick="addPost()" class="btn btn-success"><i class="fas fa-save"></i> پوسٹ محفوظ کریں</button>
+                </div>
+            </div>
+            
+            <!-- ========== ADD NEW PAGE ========== -->
+            <div id="section-addpage" class="post" style="display:none;">
+                <h2><i class="fas fa-file-circle-plus"></i> Add New Page (نیا صفحہ بنائیں)</h2>
+                <div style="background:var(--primary-soft); padding:10px 14px; border-radius:8px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><span><i class="fas fa-info-circle" style="color:var(--primary);"></i> کیا آپ کسی پہلے سے موجود صفحہ کو تبدیل یا اپڈیٹ کرنا چاہتے ہیں؟</span><button type="button" onclick="showSection('edititems')" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> ✏️ پرانا صفحہ اپڈیٹ کریں (Update)</button></div>
+                <div class="admin-panel">
+                    <label><i class="fas fa-tag"></i> صفحہ کا ID (انگریزی میں، بغیر سپیس):</label>
+                    <input type="text" id="newPageId" placeholder="مثال: nabi-ki-shaan ya masail-e-ramadan" style="direction:ltr; text-align:left;">
+                    
+                    <label><i class="fas fa-heading"></i> صفحہ کا عنوان (جو نیویگیشن اور سرچ میں دکھے):</label>
+                    <input type="text" id="newPageTitle" placeholder="مثال: مسائل رمضان المبارک">
+                    
+                    <!-- Media Tools -->
+                    <div class="media-toolbar">
+                        <span style="font-size:0.85rem; font-weight:bold; color:var(--primary); margin-left:6px;">⚡ فوری میڈیا ٹولز:</span>
+                        <button type="button" class="media-tool-btn" onclick="openMediaModal('page', 'youtube')">
+                            <i class="fab fa-youtube" style="color:#ff0000;"></i> یوٹیوب ویڈیو لنک
+                        </button>
+                        <button type="button" class="media-tool-btn" onclick="openMediaModal('page', 'image_url')">
+                            <i class="fas fa-image" style="color:#006b54;"></i> تصویر کا لنک
+                        </button>
+                        <label class="media-tool-btn" style="cursor:pointer; margin:0;">
+                            <i class="fas fa-camera" style="color:#27ae60;"></i> گیلری سے فوٹو اپلوڈ
+                            <input type="file" accept="image/*" style="display:none;" onchange="handleFileUpload(event, 'newPageContent')">
+                        </label>
+                        <label class="media-tool-btn" style="cursor:pointer; margin:0; background:linear-gradient(135deg, #e3f2fd, #bbdefb); color:#0d47a1; border-color:#90caf9;">
+                            <i class="fas fa-video" style="color:#1976d2;"></i> فون گیلری سے ویڈیو اپلوڈ 🎬 (10s)
+                            <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*" style="display:none;" onchange="handleVideoUpload(event, 'newPageContent')">
+                        </label>
+                        <label class="media-tool-btn" style="cursor:pointer; margin:0; background:linear-gradient(135deg, #fff3e0, #ffe0b2); color:#b75300; border-color:#ffcc80;">
+                            <i class="fas fa-microphone-lines" style="color:#e65100;"></i> گیلری سے آڈیو / ریکارڈنگ اپلوڈ 🎙️ (MP3 & AAC)
+                            <input type="file" accept="audio/*,audio/mp3,audio/mpeg,audio/aac,audio/x-aac,audio/m4a,audio/x-m4a,audio/mp4,audio/wav,audio/ogg,.mp3,.aac,.m4a,.wav,.ogg" style="display:none;" onchange="handleAudioUpload(event, 'newPageContent')">
+                        </label>
+                    </div>
+
+                    <label><i class="fas fa-align-left"></i> صفحہ کا مکمل مواد (HTML یا سادہ تحریر):</label>
+                    <textarea id="newPageContent" placeholder="صفحہ کا مواد لکھیں یا ویڈیو لنکس پیسٹ کریں..." oninput="updateLiveMediaPreview('newPageContent', 'pageLivePreview')"></textarea>
+                    
+                    <!-- Live Thumbnail & Media Preview Box -->
+                    <div id="pageLivePreview" class="live-preview-box" style="display:none;">
+                        <div class="live-preview-title"><i class="fas fa-magic"></i> خودکار تھمب نیل اور میڈیا لائیو پریویو:</div>
+                        <div class="preview-thumbs-grid" id="pageLivePreviewGrid"></div>
+                    </div>
+
+                    <button onclick="addNewPage()" class="btn btn-success"><i class="fas fa-save"></i> نیا صفحہ محفوظ کریں</button>
+                </div>
+            </div>
+
+            <!-- ========== ANNOUNCEMENTS SECTION ========== -->
+            <div id="section-announcements" class="post" style="display:none;">
+                <h2><i class="fas fa-bullhorn" style="color:var(--gold);"></i> اہم اعلانات کا انتظام (Live Website Announcements)</h2>
+                <p style="color:var(--text-light);">یہاں آپ ویب سائٹ کے اوپر چلنے والے اعلانات شامل کر سکتے ہیں، ایک سے زائد اعلانات ایڈ کر سکتے ہیں اور جب چاہیں ڈیلیٹ کر سکتے ہیں۔</p>
+                <hr>
+                
+                <div class="admin-panel">
+                    <label><i class="fas fa-comment-dots"></i> نیا اعلان تحریر کریں:</label>
+                    <input type="text" id="newAnnouncementText" placeholder="مثال: ✨ خوش آمدید! دارالافتاء اہلسنت میں سوال بھیجنے کا وقت...">
+                    
+                    <button onclick="addAnnouncement()" class="btn btn-success"><i class="fas fa-plus"></i> اعلان شامل کریں</button>
+                </div>
+                
+                <h3 style="margin-top:25px;"><i class="fas fa-list-check"></i> جاری اعلانات کی فہرست:</h3>
+                <div id="announcementsList" class="item-list">
+                    <p style="color:var(--text-light); text-align:center; padding:20px;">اعلانات لوڈ ہو رہے ہیں...</p>
+                </div>
+            </div>
+
+            <!-- ========== EDIT ITEMS ========== -->
+            <div id="section-edititems" class="post" style="display:none;">
+                <h2><i class="fas fa-edit"></i> ✏️ اپڈیٹ و ترمیم مرکز (Update & Edit Center)</h2>
+                <div style="background:rgba(218,165,32,0.15); border:2px solid var(--gold); border-radius:10px; padding:15px; margin-bottom:15px;">
+                    <h4 style="margin:0 0 6px 0; color:var(--primary);"><i class="fas fa-info-circle"></i> پوسٹ یا صفحہ اپڈیٹ (Update) کرنے کا طریقہ:</h4>
+                    <p style="margin:0; font-size:0.95rem; line-height:1.6;">نیچے دی گئی فہرست میں سے جس پوسٹ یا پیج کو آپ اپڈیٹ کرنا چاہتے ہیں، اس کے نیچے بنے پیلے بٹن <strong>"✏️ اپڈیٹ / ایڈٹ کریں"</strong> پر کلک کریں۔ سامنے ایک باکس کھلے گا جس میں نیا عنوان یا مواد لکھ کر سبز رنگ کے <strong>"اپڈیٹ کریں (Update)"</strong> بٹن پر کلک کریں!</p>
+                </div>
+                <hr>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3><i class="fas fa-file-alt"></i> تمام پوسٹس</h3>
+                    <input type="text" id="searchPostsFilter" placeholder="🔍 پوسٹ تلاش کریں..." style="width:220px; padding:6px 12px; border:1px solid var(--border); border-radius:8px;" oninput="filterPostsList()">
+                </div>
+                <div id="postsList" class="item-list">
+                    <p style="color:var(--text-light);">پوسٹس لوڈ ہو رہی ہیں...</p>
+                </div>
+                
+                <hr>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3><i class="fas fa-file-code"></i> تمام صفحات (200+ ایڈمن پیجز)</h3>
+                    <input type="text" id="searchPagesFilter" placeholder="🔍 پیج تلاش کریں..." style="width:220px; padding:6px 12px; border:1px solid var(--border); border-radius:8px;" oninput="filterPagesList()">
+                </div>
+                <div id="pagesList" class="item-list">
+                    <p style="color:var(--text-light);">صفحات لوڈ ہو رہے ہیں...</p>
+                </div>
+            </div>
+            
+        </div>
+        
+        <footer>
+            <p><strong>M.FAREED MUSTAFAI</strong> | آفیشل ایڈمن پورٹل v3.0 | تمام حقوق تا قیامت محفوظ ہیں © <span id="adminCopyrightYear">2026</span></p>
+        </footer>
+    </div>
+</div>
+
+<!-- ==================== MEDIA INSERT MODAL ==================== -->
+<div id="mediaModalOverlay" class="admin-modal-overlay">
+    <div class="admin-modal-box">
+        <h3 id="mediaModalTitle" style="color:var(--primary); margin-bottom:15px; border-bottom:2px solid var(--primary-soft); padding-bottom:8px;">
+            <i class="fab fa-youtube"></i> یوٹیوب ویڈیو لنک شامل کریں
+        </h3>
+        <p id="mediaModalDesc" style="font-size:0.9rem; color:var(--text-light); margin-bottom:12px;">
+            ویڈیو کا کوئی بھی یوٹیوب لنک درج کریں۔ سسٹم اس کا تھمب نیل اور ویڈیو خودکار بنا دے گا۔
+        </p>
+        
+        <input type="text" id="mediaModalInput" placeholder="https://youtu.be/..." style="width:100%; padding:10px 14px; border:2px solid var(--border); border-radius:8px; direction:ltr; text-align:left; font-size:0.95rem; margin-bottom:15px;">
+        
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" class="btn btn-sm" style="background:#777;" onclick="closeMediaModal()">منسوخ</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="confirmInsertMedia()">شامل کریں ✅</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== UPLOAD PROGRESS OVERLAY ==================== -->
+<div id="uploadProgressOverlay" class="admin-modal-overlay">
+    <div class="admin-modal-box" style="text-align:center;">
+        <h3 id="uploadProgressTitle" style="color:var(--primary); margin-bottom:12px; border:none;">
+            <i class="fas fa-video"></i> ویڈیو اپلوڈ ہو رہی ہے...
+        </h3>
+        <p id="uploadProgressFileDetails" style="font-size:0.92rem; color:var(--text-light); margin-bottom:15px;">
+            براہ کرم ونڈو بند نہ کریں۔ ویڈیو پراسیس ہو رہی ہے۔
+        </p>
+        
+        <!-- Progress Bar -->
+        <div style="background:var(--border); border-radius:20px; height:18px; width:100%; overflow:hidden; position:relative; margin-bottom:12px;">
+            <div id="uploadProgressBarFill" style="background:linear-gradient(90deg, var(--primary), var(--gold)); height:100%; width:0%; transition:width 0.2s ease;"></div>
+        </div>
+        
+        <div id="uploadProgressPercentText" style="font-weight:bold; font-size:1.1rem; color:var(--primary);">0%</div>
+        <div id="uploadProgressStatus" style="font-size:0.85rem; color:var(--text-light); margin-top:8px;">فائل تیار کی جا رہی ہے...</div>
+    </div>
+</div>
+<!-- ==================== EDIT / UPDATE MODAL ==================== -->
+<div id="editItemModalOverlay" class="admin-modal-overlay">
+    <div class="admin-modal-box" style="max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary-soft); padding-bottom:10px; margin-bottom:15px;">
+            <h3 id="editModalHeaderTitle" style="color:var(--primary); margin:0; font-size:1.25rem;">
+                <i class="fas fa-edit"></i> <span id="editModalTypeLabel">پوسٹ</span> اپڈیٹ کریں (Update)
+            </h3>
+            <button type="button" onclick="closeEditModal()" style="background:none; border:none; font-size:1.6rem; cursor:pointer; color:var(--text-light); line-height:1;">&times;</button>
+        </div>
+
+        <input type="hidden" id="editModalItemType" value="">
+        <input type="hidden" id="editModalItemKey" value="">
+
+        <div id="editModalTitleGroup" style="margin-bottom:15px;">
+            <label style="font-weight:bold; display:block; margin-bottom:6px; color:var(--text);"><i class="fas fa-heading"></i> عنوان (Title):</label>
+            <input type="text" id="editModalTitleInput" style="width:100%; padding:10px 14px; border:2px solid var(--border); border-radius:8px; font-size:1rem; box-sizing:border-box; background:var(--bg); color:var(--text);">
+        </div>
+
+        <div id="editModalMediaTools" class="media-toolbar" style="margin-bottom:12px; display:flex; flex-wrap:wrap; gap:8px;">
+            <button type="button" class="media-tool-btn" onclick="openMediaModal('editModal', 'youtube')">
+                <i class="fab fa-youtube" style="color:#e74c3c;"></i> یوٹیوب لنک
+            </button>
+            <button type="button" class="media-tool-btn" onclick="openMediaModal('editModal', 'image_url')">
+                <i class="fas fa-image" style="color:#27ae60;"></i> تصویر لنک
+            </button>
+            <label class="media-tool-btn" style="margin:0; cursor:pointer;">
+                <i class="fas fa-camera" style="color:#27ae60;"></i> تصویر
+                <input type="file" accept="image/*" style="display:none;" onchange="handleFileUpload(event, 'editModalContentTextarea')">
+            </label>
+            <label class="media-tool-btn" style="margin:0; cursor:pointer; background:linear-gradient(135deg, #e3f2fd, #bbdefb); color:#0d47a1; border-color:#90caf9;">
+                <i class="fas fa-video" style="color:#1976d2;"></i> ویڈیو (10s)
+                <input type="file" accept="video/*" style="display:none;" onchange="handleVideoUpload(event, 'editModalContentTextarea')">
+            </label>
+            <label class="media-tool-btn" style="margin:0; cursor:pointer; background:linear-gradient(135deg, #fff3e0, #ffe0b2); color:#b75300; border-color:#ffcc80;">
+                <i class="fas fa-microphone-lines" style="color:#e65100;"></i> آڈیو / ریکارڈنگ (MP3 & AAC) 🎙️
+                <input type="file" accept="audio/*,audio/mp3,audio/mpeg,audio/aac,audio/x-aac,audio/m4a,audio/x-m4a,audio/mp4,audio/wav,audio/ogg,.mp3,.aac,.m4a,.wav,.ogg" style="display:none;" onchange="handleAudioUpload(event, 'editModalContentTextarea')">
+            </label>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label style="font-weight:bold; display:block; margin-bottom:6px; color:var(--text);"><i class="fas fa-align-right"></i> مواد / تحریر (Content):</label>
+            <textarea id="editModalContentTextarea" rows="8" style="width:100%; padding:12px; border:2px solid var(--border); border-radius:8px; font-size:0.95rem; line-height:1.7; box-sizing:border-box; background:var(--bg); color:var(--text);"></textarea>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:flex-end; align-items:center;">
+            <button type="button" class="btn" style="background:#777; color:white; padding:10px 20px;" onclick="closeEditModal()">
+                <i class="fas fa-times"></i> منسوخ
+            </button>
+            <button type="button" id="editModalSubmitBtn" class="btn btn-success" style="font-size:1.1rem; font-weight:bold; padding:12px 28px; box-shadow:0 4px 15px rgba(0,107,84,0.3);" onclick="saveItemUpdate()">
+                <i class="fas fa-save"></i> اپڈیٹ کریں (Update Now)
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== FIREBASE CONFIG ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyBtwg9tjN8Jxp7orDpLWruTAmKPkIClG0U",
+        authDomain: "fareed-mustafai-vercel-website.firebaseapp.com",
+        databaseURL: "https://fareed-mustafai-vercel-website-default-rtdb.firebaseio.com",
+        projectId: "fareed-mustafai-vercel-website",
+        storageBucket: "fareed-mustafai-vercel-website.firebasestorage.app",
+        messagingSenderId: "939035629284",
+        appId: "1:939035629284:web:12db8268e193143767fef1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+
+    const DEFAULT_ADMIN_EMAIL = "mfareedmustafaiii@gmail.com";
+
+    // Dynamic Perpetual Copyright Year
+    (function() {
+        const yr = document.getElementById('adminCopyrightYear');
+        if (yr) yr.textContent = new Date().getFullYear();
+    })();
+
+    // ========== AUTO FILL TIMER ==========
+    let autoFillTimer = 20;
+    let timerInterval = null;
+    let isAutoFilled = false;
+
+    function startAutoFillTimer() {
+        const timerDisplay = document.getElementById('countdownTimer');
+        const emailInput = document.getElementById('loginEmail');
+        const emailDisplay = document.getElementById('emailDisplay');
+        const autoText = document.getElementById('autoEmailText');
+        const timerInfo = document.getElementById('timerInfo');
+        
+        if (auth.currentUser) {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInfo.style.display = 'none';
+            return;
+        }
+
+        timerInterval = setInterval(() => {
+            autoFillTimer--;
+            if (timerDisplay) timerDisplay.textContent = autoFillTimer;
+            
+            if (autoFillTimer <= 0) {
+                clearInterval(timerInterval);
+                const currentValue = emailInput.value.trim();
+                if (!currentValue) {
+                    emailInput.value = DEFAULT_ADMIN_EMAIL;
+                    emailInput.disabled = true;
+                    isAutoFilled = true;
+                    autoText.textContent = DEFAULT_ADMIN_EMAIL;
+                    emailDisplay.style.display = 'block';
+                    timerInfo.innerHTML = '✅ <span style="color:var(--success); font-weight:bold;">ای میل خودکار ہو گئی!</span> اب صرف پاس ورڈ درج کریں۔';
+                    timerInfo.style.borderColor = 'var(--success)';
+                    document.getElementById('loginPassword').focus();
+                } else {
+                    timerInfo.style.display = 'none';
+                }
+            }
+        }, 1000);
+    }
+
+    // ========== DOM EVENT LISTENERS ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailInput = document.getElementById('loginEmail');
+        const timerInfo = document.getElementById('timerInfo');
+        
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                if (this.value.trim() !== '' && timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInfo.innerHTML = '✏️ آپ نے خود ای میل درج کی ہے۔ ٹائمر روک دیا گیا۔';
+                    timerInfo.style.borderColor = 'var(--secondary)';
+                    this.disabled = false;
+                    isAutoFilled = false;
+                    document.getElementById('emailDisplay').style.display = 'none';
+                }
+            });
+            
+            emailInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+            });
+        }
+        
+        const loginPass = document.getElementById('loginPassword');
+        if (loginPass) {
+            loginPass.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') loginWithEmail();
+            });
+            
+            loginPass.addEventListener('focus', function() {
+                const emailInput = document.getElementById('loginEmail');
+                if (emailInput && !emailInput.value.trim() && !isAutoFilled) {
+                    emailInput.value = DEFAULT_ADMIN_EMAIL;
+                    emailInput.disabled = true;
+                    isAutoFilled = true;
+                    document.getElementById('autoEmailText').textContent = DEFAULT_ADMIN_EMAIL;
+                    document.getElementById('emailDisplay').style.display = 'block';
+                    const timerInfo = document.getElementById('timerInfo');
+                    timerInfo.innerHTML = '✅ <span style="color:var(--success); font-weight:bold;">ای میل خودکار ہو گئی!</span>';
+                    timerInfo.style.borderColor = 'var(--success)';
+                    if (timerInterval) clearInterval(timerInterval);
+                }
+            });
+        }
+    });
+
+    // ========== AUTH FUNCTIONS ==========
+    function loginWithEmail() {
+        const emailInput = document.getElementById('loginEmail');
+        const email = emailInput.value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const errorDiv = document.getElementById('loginError');
+        errorDiv.textContent = '';
+        
+        if (!email || !password) { 
+            if (!email) errorDiv.textContent = '❌ براہِ کرم ای میل درج کریں۔';
+            else errorDiv.textContent = '❌ براہِ کرم پاس ورڈ درج کریں۔';
+            return; 
+        }
+        errorDiv.textContent = '⏳ لاگ ان ہو رہا ہے...';
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                errorDiv.textContent = '';
+                document.getElementById('userInfo').textContent = 'Logged in as: ' + userCredential.user.email;
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('loginScreen').style.display = 'none';
+                if (timerInterval) clearInterval(timerInterval);
+                loadDashboard();
+            })
+            .catch((error) => { 
+                if (error.code === 'auth/user-not-found') {
+                    errorDiv.textContent = '❌ یہ ای میل موجود نہیں ہے۔ صرف ایڈمن لاگ ان کر سکتا ہے۔';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorDiv.textContent = '❌ غلط پاس ورڈ۔';
+                } else {
+                    errorDiv.textContent = '❌ ' + error.message;
+                }
+            });
+    }
+    
+    function logoutUser() {
+        auth.signOut().then(() => {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('userInfo').textContent = '';
+            autoFillTimer = 20;
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginEmail').disabled = false;
+            document.getElementById('emailDisplay').style.display = 'none';
+            const timerInfo = document.getElementById('timerInfo');
+            timerInfo.style.display = 'block';
+            timerInfo.innerHTML = '⏳ <span id="countdownTimer">20</span> سیکنڈ میں ای میل خودکار ہو جائے گی...';
+            timerInfo.style.borderColor = 'var(--primary)';
+            document.getElementById('loginPassword').value = '';
+            startAutoFillTimer();
+        });
+    }
+
+    // ========== AUTH STATE ==========
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById('userInfo').textContent = 'Logged in as: ' + user.email;
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('loginScreen').style.display = 'none';
+            if (timerInterval) clearInterval(timerInterval);
+            loadDashboard();
+        } else {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            startAutoFillTimer();
+        }
+    });
+
+    // ========== THEME TOGGLE ==========
+    let darkMode = localStorage.getItem('adminTheme') === 'dark';
+    if (darkMode) document.body.classList.add('dark-mode');
+    function toggleTheme() {
+        darkMode = !darkMode;
+        document.body.classList.toggle('dark-mode', darkMode);
+        localStorage.setItem('adminTheme', darkMode ? 'dark' : 'light');
+    }
+
+    // ========== NAVIGATION ==========
+    function showSection(section) {
+        const sections = ['dashboard', 'addpost', 'addpage', 'announcements', 'edititems'];
+        sections.forEach(s => {
+            const el = document.getElementById('section-' + s);
+            if (el) el.style.display = (s === section) ? 'block' : 'none';
+        });
+        document.querySelectorAll('.nav a').forEach(link => link.classList.remove('active'));
+        document.querySelectorAll('.nav a').forEach(link => {
+            if (link.getAttribute('href') === '#' + section) link.classList.add('active');
+        });
+        if (section === 'edititems') loadPostsAndPages();
+        if (section === 'announcements') loadAnnouncements();
+        if (section === 'dashboard') loadDashboard();
+    }
+
+    // ========== DASHBOARD ==========
+    function loadDashboard() {
+        database.ref('posts').once('value').then((snapshot) => {
+            const posts = snapshot.val() || {};
+            document.getElementById('postCount').textContent = Object.keys(posts).length;
+        });
+        database.ref('pages').once('value').then((snapshot) => {
+            const pages = snapshot.val() || {};
+            document.getElementById('pageCount').textContent = Object.keys(pages).length;
+        });
+        database.ref('announcements').once('value').then((snapshot) => {
+            const announcements = snapshot.val() || {};
+            const countEl = document.getElementById('announcementCount');
+            if (countEl) countEl.textContent = Object.keys(announcements).length;
+        });
+    }
+
+    // ========== ANNOUNCEMENT (اعلان) MANAGEMENT ==========
+    function loadAnnouncements() {
+        const container = document.getElementById('announcementsList');
+        if (!container) return;
+        
+        database.ref('announcements').once('value').then((snapshot) => {
+            const data = snapshot.val() || {};
+            const keys = Object.keys(data).sort((a, b) => (data[b].timestamp || 0) - (data[a].timestamp || 0));
+            
+            const countEl = document.getElementById('announcementCount');
+            if (countEl) countEl.textContent = keys.length;
+
+            if (keys.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-light); text-align:center; padding:25px;">ابھی کوئی اعلان موجود نہیں ہے۔ اوپر سے نیا اعلان شامل کریں۔</p>';
+                return;
+            }
+            
+            let html = '';
+            keys.forEach((key, idx) => {
+                const item = data[key];
+                const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString('ur-PK') : '';
+                html += '<div class="item-card" style="display:flex; justify-content:space-between; align-items:center;">';
+                html += '<div style="flex:1; padding-left:15px;">';
+                html += '<strong style="color:var(--primary); font-size:1.05rem;">' + (idx + 1) + '. ' + (item.text || '') + '</strong>';
+                html += '<div style="font-size:0.8rem; color:var(--text-light); margin-top:4px;"><i class="far fa-calendar-alt"></i> ' + date + '</div>';
+                html += '</div>';
+                html += '<div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">' +'<button onclick="openEditModal(\x27announcement\x27, \x27' + key + '\x27)" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> اپڈیٹ / ایڈٹ</button>' +'<button onclick="deleteAnnouncement(\'' + key + '\')" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> ڈیلیٹ 🗑️</button>' +'</div>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+        }).catch((err) => {
+            console.error("Announcements load error:", err);
+            container.innerHTML = '<p style="color:red; text-align:center;">❌ اعلانات لوڈ کرنے میں خرابی</p>';
+        });
+    }
+
+    function addAnnouncement() {
+        const input = document.getElementById('newAnnouncementText');
+        const text = input ? input.value.trim() : '';
+        if (!text) {
+            alert('❌ براہِ کرم اعلان کا متن درج فرمائیں۔');
+            return;
+        }
+        
+        database.ref('announcements').push({
+            text: text,
+            timestamp: Date.now()
+        }).then(() => {
+            alert('✅ نیا اعلان کامیابی سے شامل ہو گیا اور ویب سائٹ پر لائیو دکھنا شروع ہو گیا!');
+            if (input) input.value = '';
+            loadAnnouncements();
+            loadDashboard();
+        }).catch((err) => {
+            alert('❌ خرابی: ' + err.message);
+        });
+    }
+
+    function deleteAnnouncement(key) {
+        if (!confirm('کیا آپ واقعی اس اعلان کو حذف کرنا چاہتے ہیں؟')) return;
+        database.ref('announcements/' + key).remove().then(() => {
+            alert('✅ اعلان حذف ہو گیا!');
+            loadAnnouncements();
+            loadDashboard();
+        }).catch((err) => {
+            alert('❌ خرابی: ' + err.message);
+        });
+    }
+
+    // ========== EXTRACT YOUTUBE VIDEO ID & THUMBNAIL ==========
+    function extractYouTubeId(url) {
+        if (!url) return null;
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+        return match ? match[1] : null;
+    }
+
+    function extractAllMediaFromText(text) {
+        if (!text) return { ytVideos: [], localVideos: [], images: [], audios: [] };
+        const ytVideos = [];
+        const localVideos = [];
+        const images = [];
+        const audios = [];
+
+        // 1. YouTube links
+        const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/gi;
+        let m;
+        while ((m = ytRegex.exec(text)) !== null) {
+            const vid = m[1];
+            if (!ytVideos.some(v => v.id === vid)) {
+                ytVideos.push({
+                    id: vid,
+                    url: m[0],
+                    thumb: 'https://img.youtube.com/vi/' + vid + '/mqdefault.jpg'
+                });
+            }
+        }
+
+        // 2. Direct Videos
+        const vUrlRegex = /(https?:\/\/[^\s"'<>]+\.(?:mp4|webm|ogg)(?:\?[^\s"'<>]*)?)/gi;
+        while ((m = vUrlRegex.exec(text)) !== null) {
+            const url = m[1];
+            if (!localVideos.includes(url)) localVideos.push(url);
+        }
+        const vDataRegex = /(data:video\/[a-zA-Z0-9.-]+;base64,[^\s"'<>]+)/g;
+        while ((m = vDataRegex.exec(text)) !== null) {
+            const url = m[1];
+            if (!localVideos.includes(url)) localVideos.push(url);
+        }
+
+        // 3. Images
+        const imgRegex = /(https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s"'<>]*)?)/gi;
+        while ((m = imgRegex.exec(text)) !== null) {
+            const url = m[1];
+            if (!images.includes(url)) images.push(url);
+        }
+        const b64Regex = /(data:image\/[a-zA-Z]+;base64,[^\s"'<>]+)/g;
+        while ((m = b64Regex.exec(text)) !== null) {
+            const url = m[1];
+            if (!images.includes(url)) images.push(url);
+        }
+
+        // 4. Audios (MP3, AAC, M4A, WAV, OGG, or embedded audio)
+        const aUrlRegex = /(https?:\/\/[^\s"'<>]+\.(?:mp3|aac|m4a|wav|ogg)(?:\?[^\s"'<>]*)?)/gi;
+        while ((m = aUrlRegex.exec(text)) !== null) {
+            const url = m[1];
+            if (!audios.includes(url)) audios.push(url);
+        }
+        const aDataRegex = /(data:audio\/[a-zA-Z0-9.-]+;base64,[^\s"'<>]+)/g;
+        while ((m = aDataRegex.exec(text)) !== null) {
+            const url = m[1];
+            if (!audios.includes(url)) audios.push(url);
+        }
+        if ((text.includes('<audio') || text.includes('user-uploaded-audio')) && audios.length === 0) {
+            audios.push('audio_attached');
+        }
+
+        return { ytVideos, localVideos, images, audios };
+    }
+
+    // ========== LIVE MEDIA PREVIEW AS YOU TYPE ==========
+    function updateLiveMediaPreview(textareaId, previewBoxId) {
+        const textarea = document.getElementById(textareaId);
+        const previewBox = document.getElementById(previewBoxId);
+        const grid = document.getElementById(previewBoxId + 'Grid');
+        if (!textarea || !previewBox || !grid) return;
+
+        const text = textarea.value || '';
+        const { ytVideos, localVideos, images, audios } = extractAllMediaFromText(text);
+
+        if (ytVideos.length === 0 && (!localVideos || localVideos.length === 0) && images.length === 0 && (!audios || audios.length === 0)) {
+            previewBox.style.display = 'none';
+            grid.innerHTML = '';
+            return;
+        }
+
+        previewBox.style.display = 'block';
+        let h = '';
+
+        ytVideos.forEach(v => {
+            h += '<div class="preview-thumb-card">';
+            h += '<img src="' + v.thumb + '" alt="YouTube Thumbnail">';
+            h += '<span class="thumb-badge"><i class="fab fa-youtube" style="color:#ff4444;"></i> یوٹیوب</span>';
+            h += '<div class="thumb-caption">ID: ' + v.id + '</div>';
+            h += '</div>';
+        });
+
+        if (localVideos && localVideos.length > 0) {
+            localVideos.forEach((v, idx) => {
+                h += '<div class="preview-thumb-card">';
+                h += '<video src="' + v + '" style="width:100%; height:110px; object-fit:cover; background:#000;" muted></video>';
+                h += '<span class="thumb-badge" style="background:#1976d2;"><i class="fas fa-video"></i> گیلری ویڈیو ' + (idx + 1) + '</span>';
+                h += '<div class="thumb-caption">اپلوڈ شدہ ویڈیو</div>';
+                h += '</div>';
+            });
+        }
+
+        images.forEach((img, idx) => {
+            h += '<div class="preview-thumb-card">';
+            h += '<img src="' + img + '" alt="تصویر">';
+            h += '<span class="thumb-badge" style="background:#006b54;"><i class="fas fa-image"></i> تصویر ' + (idx + 1) + '</span>';
+            h += '<div class="thumb-caption">فوٹو اٹیچمنٹ</div>';
+            h += '</div>';
+        });
+
+        
+        if (audios && audios.length > 0) {
+            audios.forEach((a, idx) => {
+                h += '<div class="preview-thumb-card">' +
+                    '<div style="height:110px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius:8px 8px 0 0;">' +
+                        '<span style="font-size:2.4rem;">🎙️</span>' +
+                        '<span style="font-size:0.75rem; font-weight:bold; color:#1b5e20; margin-top:4px;">MP3 / AAC صوتی ریکارڈنگ</span>' +
+                    '</div>' +
+                    '<span class="thumb-badge" style="background:#2e7d32;"><i class="fas fa-microphone-lines"></i> آڈیو ' + (idx + 1) + '</span>' +
+                    '<div class="thumb-caption">صوتی اٹیچمنٹ</div>' +
+                '</div>';
+            });
+        }
+
+        grid.innerHTML = h;
+    }
+
+    // ========== FILE UPLOAD (PHOTO) ==========
+    function handleFileUpload(event, targetTextareaId) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const maxDim = 900;
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+                const textarea = document.getElementById(targetTextareaId);
+                if (textarea) {
+                    const tag = '\n<div class="user-uploaded-img" style="text-align:center; margin:16px 0;"><img src="' + compressedDataUrl + '" alt="تصویر" style="max-width:100%; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);" loading="lazy"></div>\n';
+                    textarea.value = (textarea.value || '') + tag;
+                    if (targetTextareaId === 'postContent') updateLiveMediaPreview('postContent', 'postLivePreview');
+                    else updateLiveMediaPreview('newPageContent', 'pageLivePreview');
+                    alert('✅ تصویر کامیابی سے اٹیچ ہو گئی!');
+                }
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ========== VIDEO GALLERY UPLOADER (GUARANTEED 10 SECONDS) ==========
+    function handleVideoUpload(event, targetTextareaId) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+        const fileName = file.name || 'video_' + Date.now() + '.mp4';
+
+        const overlay = document.getElementById('uploadProgressOverlay');
+        const fill = document.getElementById('uploadProgressBarFill');
+        const percentText = document.getElementById('uploadProgressPercentText');
+        const statusText = document.getElementById('uploadProgressStatus');
+        const detailsText = document.getElementById('uploadProgressFileDetails');
+
+        if (overlay) overlay.classList.add('active');
+        if (fill) fill.style.width = '0%';
+        if (percentText) percentText.textContent = '0%';
+        if (detailsText) detailsText.textContent = fileName + ' (' + sizeMb + ' MB)';
+        if (statusText) statusText.textContent = 'ویڈیو پراسیس ہو رہی ہے... (10 سیکنڈ)';
+
+        let progress = 0;
+        let timeLeft = 10;
+        
+        const countdownInterval = setInterval(function() {
+            timeLeft--;
+            progress += 10;
+            if (progress > 95) progress = 95;
+            
+            if (fill) fill.style.width = progress + '%';
+            if (percentText) percentText.textContent = progress + '%';
+            if (statusText) statusText.textContent = 'اپلوڈ جاری ہے... (' + Math.max(1, timeLeft) + ' سیکنڈ باقی)';
+        }, 1000);
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const videoDataUrl = e.target.result;
+
+            setTimeout(function() {
+                clearInterval(countdownInterval);
+                if (fill) fill.style.width = '100%';
+                if (percentText) percentText.textContent = '100%';
+                if (statusText) statusText.textContent = '✅ مکمل! ویڈیو شامل کی جا رہی ہے...';
+
+                setTimeout(function() {
+                    if (overlay) overlay.classList.remove('active');
+
+                    const textarea = document.getElementById(targetTextareaId);
+                    if (textarea) {
+                        const tag = '\n<div class="user-uploaded-video" style="margin:18px 0; background:var(--card-bg,#fff); border:1px solid var(--border,#ddd); border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.08);">' +
+                            '<video controls preload="metadata" style="width:100%; max-height:480px; background:#000; display:block;">' +
+                                '<source src="' + videoDataUrl + '">' +
+                                'آپ کا براؤزر ویڈیو سپورٹ نہیں کرتا۔' +
+                            '</video>' +
+                            '<div style="padding:10px 16px; background:var(--primary-soft,#eef9f6); font-size:0.88rem; font-weight:bold; color:var(--primary,#006b54); display:flex; justify-content:space-between; align-items:center;">' +
+                                '<span>🎬 گیلری ویڈیو: ' + fileName + ' (' + sizeMb + ' MB)</span>' +
+                                '<span style="color:#666;">آن لائن پلے</span>' +
+                            '</div>' +
+                        '</div>\n';
+
+                        textarea.value = (textarea.value || '') + tag;
+                        if (targetTextareaId === 'postContent') updateLiveMediaPreview('postContent', 'postLivePreview');
+                        else updateLiveMediaPreview('newPageContent', 'pageLivePreview');
+                        alert('✅ ماشاءاللہ! 10 سیکنڈ میں ویڈیو کامیابی سے اپلوڈ ہو کر اٹیچ ہو گئی۔');
+                    }
+                }, 400);
+            }, 10000);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ========== AUDIO GALLERY / RECORDING UPLOADER (ALL MP3, AAC, M4A, UNLIMITED SIZE) ==========
+    function handleAudioUpload(event, targetTextareaId) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        const fileName = file.name || ('audio_recording_' + Date.now() + '.mp3');
+        
+        let ext = (fileName.split('.').pop() || 'mp3').toUpperCase();
+        if (file.type && file.type.includes('aac')) ext = 'AAC (ریکارڈنگ)';
+        else if (file.type && file.type.includes('mpeg')) ext = 'MP3';
+        else if (file.type && file.type.includes('m4a')) ext = 'M4A (ریکارڈنگ)';
+        else if (file.type && file.type.includes('wav')) ext = 'WAV';
+        else if (file.type && file.type.includes('ogg')) ext = 'OGG';
+
+        const overlay = document.getElementById('uploadProgressOverlay');
+        const fill = document.getElementById('uploadProgressBarFill');
+        const percentText = document.getElementById('uploadProgressPercentText');
+        const statusText = document.getElementById('uploadProgressStatus');
+        const detailsText = document.getElementById('uploadProgressFileDetails');
+        const titleEl = document.getElementById('uploadProgressTitle');
+
+        if (titleEl) titleEl.innerHTML = '<i class="fas fa-microphone-alt" style="color:#2e7d32;"></i> آڈیو / صوتی ریکارڈنگ اپلوڈ ہو رہی ہے...';
+        if (overlay) overlay.classList.add('active');
+        if (fill) fill.style.width = '0%';
+        if (percentText) percentText.textContent = '0%';
+        if (detailsText) detailsText.textContent = '🎙️ ' + fileName + ' (' + sizeMb + ' MB | فارمیٹ: ' + ext + ')';
+        if (statusText) statusText.textContent = 'صوتی ریکارڈنگ تیار کی جا رہی ہے... (بغیر کسی سائز کی حد کے)';
+
+        let progress = 0;
+        const progressInterval = setInterval(function() {
+            progress += 10;
+            if (progress > 90) progress = 90;
+            if (fill) fill.style.width = progress + '%';
+            if (percentText) percentText.textContent = progress + '%';
+            if (statusText) statusText.textContent = 'ریکارڈنگ لوڈ ہو رہی ہے... (' + progress + '%)';
+        }, 200);
+
+        const reader = new FileReader();
+
+        reader.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percent = Math.min(98, Math.round((e.loaded / e.total) * 98));
+                if (percent > progress) {
+                    progress = percent;
+                    if (fill) fill.style.width = progress + '%';
+                    if (percentText) percentText.textContent = progress + '%';
+                    if (statusText) statusText.textContent = 'ریکارڈنگ لوڈ ہو رہی ہے... (' + progress + '%)';
+                }
+            }
+        };
+
+        reader.onload = function(e) {
+            const audioDataUrl = e.target.result;
+            clearInterval(progressInterval);
+            if (fill) fill.style.width = '100%';
+            if (percentText) percentText.textContent = '100%';
+            if (statusText) statusText.textContent = '✅ مکمل! آڈیو پلیئر اٹیچ کیا جا رہا ہے...';
+
+            setTimeout(function() {
+                if (overlay) overlay.classList.remove('active');
+
+                const textarea = document.getElementById(targetTextareaId);
+                if (textarea) {
+                    const mimeType = file.type || (ext.includes('AAC') ? 'audio/aac' : (ext.includes('M4A') ? 'audio/mp4' : 'audio/mpeg'));
+                    const audioTag = '\n<div class="user-uploaded-audio" style="margin:16px 0; background:linear-gradient(135deg, #f4fbf8, #e8f5f1); border:1.5px solid #006b54; border-radius:14px; padding:16px; box-shadow:0 4px 15px rgba(0,107,84,0.08); direction:rtl; text-align:right;">' +
+                        '<div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap;">' +
+                            '<div style="background:#006b54; color:#ffd700; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.25rem; flex-shrink:0; box-shadow:0 2px 8px rgba(0,107,84,0.25);">' +
+                                '<i class="fas fa-volume-up"></i>' +
+                            '</div>' +
+                            '<div style="flex:1; min-width:200px;">' +
+                                '<div style="font-weight:bold; color:#004d3d; font-size:1rem; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">' +
+                                    '🎙️ صوتی بیان / ریکارڈنگ: ' + fileName +
+                                '</div>' +
+                                '<div style="font-size:0.8rem; color:#52635e; margin-top:2px;">' +
+                                    'حجم: ' + sizeMb + ' MB | فارمیٹ: ' + ext + ' | آن لائن پلے کریں' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<audio controls preload="metadata" style="width:100%; border-radius:30px; outline:none; height:42px;">' +
+                            '<source src="' + audioDataUrl + '" type="' + mimeType + '">' +
+                            'آپ کا براؤزر آڈیو پلیئر سپورٹ نہیں کرتا۔' +
+                        '</audio>' +
+                    '</div>\n';
+
+                    textarea.value = (textarea.value ? textarea.value + '<br>' : '') + audioTag;
+                    if (targetTextareaId === 'postContent') updateLiveMediaPreview('postContent', 'postLivePreview');
+                    else if (targetTextareaId === 'newPageContent') updateLiveMediaPreview('newPageContent', 'pageLivePreview');
+                    
+                    alert('✅ ماشاءاللہ! آڈیو ریکارڈنگ (' + fileName + ' - ' + sizeMb + ' MB) بغیر کسی سائز کی رکاوٹ کے کامیابی سے شامل ہو گئی۔');
+                }
+                if (event.target) event.target.value = '';
+            }, 350);
+        };
+
+        reader.onerror = function(err) {
+            clearInterval(progressInterval);
+            if (overlay) overlay.classList.remove('active');
+            alert('❌ آڈیو اپلوڈ کرنے میں خرابی: ' + (err.message || 'فائل لوڈ نہیں ہو سکی'));
+            if (event.target) event.target.value = '';
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    // ========== MEDIA MODAL ==========
+    let activeMediaContext = { target: 'post', type: 'youtube' };
+
+    function openMediaModal(target, type) {
+        activeMediaContext = { target, type };
+        const modal = document.getElementById('mediaModalOverlay');
+        const title = document.getElementById('mediaModalTitle');
+        const desc = document.getElementById('mediaModalDesc');
+        const input = document.getElementById('mediaModalInput');
+
+        if (type === 'youtube') {
+            title.innerHTML = '<i class="fab fa-youtube" style="color:#ff0000;"></i> یوٹیوب ویڈیو لنک شامل کریں';
+            desc.textContent = 'ویڈیو کا یوٹیوب لنک درج کریں (جیسے https://youtu.be/... یا https://www.youtube.com/watch?v=...)۔ خودکار تھمب نیل اور پلیئر تیار ہو جائے گا۔';
+            input.placeholder = 'https://youtu.be/GHyj_a_A-3s';
+        } else {
+            title.innerHTML = '<i class="fas fa-image" style="color:#006b54;"></i> تصویر کا لنک (URL) شامل کریں';
+            desc.textContent = 'کسی بھی تصویر کا آن لائن ڈائریکٹ لنک درج کریں (جیسے https://.../photo.jpg):';
+            input.placeholder = 'https://example.com/image.jpg';
+        }
+        input.value = '';
+        modal.classList.add('active');
+        setTimeout(() => input.focus(), 150);
+    }
+
+    function closeMediaModal() {
+        document.getElementById('mediaModalOverlay').classList.remove('active');
+    }
+
+    function confirmInsertMedia() {
+        const val = document.getElementById('mediaModalInput').value.trim();
+        if (!val) {
+            alert('❌ براہِ کرم لنک درج فرمائیں۔');
+            return;
+        }
+
+        const targetId = activeMediaContext.target === 'editModal' ? 'editModalContentTextarea' : (activeMediaContext.target === 'post' ? 'postContent' : 'newPageContent');
+        const textarea = document.getElementById(targetId);
+        if (!textarea) return;
+
+        if (activeMediaContext.type === 'youtube') {
+                    textarea.value = (textarea.value ? textarea.value + String.fromCharCode(10, 10) : "") + audioTag;
+        } else {
+            const imgTag = '<div style="text-align:center; margin:16px 0;"><img src="' + val + '" alt="تصویر" style="max-width:100%; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);" loading="lazy"></div>';
+                    textarea.value = (textarea.value ? textarea.value + String.fromCharCode(10, 10) : "") + audioTag;
+        }
+
+        if (activeMediaContext.target === 'post') updateLiveMediaPreview('postContent', 'postLivePreview');
+        else updateLiveMediaPreview('newPageContent', 'pageLivePreview');
+
+        closeMediaModal();
+    }
+
+    // ========== ADD POST ==========
+    function addPost() {
+        const title = document.getElementById('postTitle').value.trim();
+        const content = document.getElementById('postContent').value.trim();
+        if (!title || !content) { alert('❌ براہِ کرم عنوان اور مواد درج کریں۔'); return; }
+
+        const newPostRef = database.ref('posts').push();
+        newPostRef.set({ title: title, content: content, timestamp: Date.now() })
+            .then(() => { 
+                alert('✅ پوسٹ کامیابی سے فائر بیس پر شامل ہو گئی! ویب سائٹ پر اس کا تھمب نیل خودکار بن جائے گا۔'); 
+                document.getElementById('postTitle').value = ''; 
+                document.getElementById('postContent').value = ''; 
+                document.getElementById('postLivePreview').style.display = 'none';
+                loadDashboard(); 
+                showSection('edititems');
+            })
+            .catch((error) => { alert('❌ خرابی: ' + error.message); });
+    }
+    
+    // ========== ADD NEW PAGE ==========
+    function addNewPage() {
+        const id = document.getElementById('newPageId').value.trim();
+        const title = document.getElementById('newPageTitle').value.trim();
+        const content = document.getElementById('newPageContent').value.trim();
+        if (!id || !title || !content) { alert('❌ براہِ کرم تمام فیلڈز پر کریں۔'); return; }
+        if (!/^[a-zA-Z0-9\-_]+$/.test(id)) { alert('❌ صفحہ کا ID صرف انگریزی حروف، نمبر اور (-_) پر مشتمل ہو سکتا ہے۔'); return; }
+
+        database.ref('pages/' + id).once('value').then((snapshot) => {
+            if (snapshot.exists()) { alert('❌ یہ صفحہ پہلے سے موجود ہے۔ مختلف ID استعمال کریں۔'); return; }
+            database.ref('pages/' + id).set({ title: title, content: content, timestamp: Date.now() })
+                .then(() => { 
+                    alert('✅ نیا صفحہ کامیابی سے فائر بیس پر بن گیا! ویب سائٹ اور سرچ میں فوری شو ہوگا۔'); 
+                    document.getElementById('newPageId').value = ''; 
+                    document.getElementById('newPageTitle').value = ''; 
+                    document.getElementById('newPageContent').value = ''; 
+                    document.getElementById('pageLivePreview').style.display = 'none';
+                    loadDashboard(); 
+                    showSection('edititems');
+                })
+                .catch((error) => { alert('❌ خرابی: ' + error.message); });
+        });
+    }
+
+    // ========== LOAD POSTS AND PAGES ==========
+    let _cachedPosts = [];
+    let _cachedPages = [];
+
+    function loadPostsAndPages() {
+        database.ref('posts').orderByChild('timestamp').once('value').then((snapshot) => {
+            const posts = snapshot.val() || {};
+            _cachedPosts = [];
+            const keys = Object.keys(posts).sort((a, b) => (posts[b].timestamp || 0) - (posts[a].timestamp || 0));
+            keys.forEach(k => _cachedPosts.push({ key: k, data: posts[k] }));
+            renderPostsList(_cachedPosts);
+        });
+
+        database.ref('pages').once('value').then((snapshot) => {
+            const pages = snapshot.val() || {};
+            _cachedPages = [];
+            const keys = Object.keys(pages).sort();
+            keys.forEach(k => _cachedPages.push({ key: k, data: pages[k] }));
+            renderPagesList(_cachedPages);
+        });
+    }
+
+    function renderPostsList(list) {
+        const container = document.getElementById('postsList');
+        if (!container) return;
+        if (list.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-light); text-align:center; padding:20px;">کوئی پوسٹ نہیں ملی۔</p>';
+            return;
+        }
+
+        let html = '';
+        list.forEach((item, idx) => {
+            const post = item.data;
+            const key = item.key;
+            const date = post.timestamp ? new Date(post.timestamp).toLocaleDateString('ur-PK') : '';
+            const { ytVideos, localVideos, images } = extractAllMediaFromText(post.content || '');
+
+            let mediaHtml = '';
+            if (ytVideos.length > 0 || (localVideos && localVideos.length > 0) || images.length > 0) {
+                mediaHtml += '<div class="item-media-preview">';
+                ytVideos.slice(0, 3).forEach(v => {
+                    mediaHtml += '<div style="position:relative; display:inline-block;"><img src="' + v.thumb + '" alt="YouTube"><span style="position:absolute; bottom:4px; right:4px; background:#e74c3c; color:white; font-size:0.65rem; padding:1px 5px; border-radius:4px; font-weight:bold;">▶ یوٹیوب</span></div>';
+                });
+                if (localVideos) {
+                    localVideos.slice(0, 2).forEach(v => {
+                        mediaHtml += '<div style="position:relative; display:inline-block;"><video src="' + v + '" style="width:140px; height:85px; object-fit:cover; border-radius:8px; background:#000;" muted></video><span style="position:absolute; bottom:4px; right:4px; background:#1976d2; color:white; font-size:0.65rem; padding:1px 5px; border-radius:4px; font-weight:bold;">🎬 ویڈیو</span></div>';
+                    });
+                }
+                images.slice(0, 3).forEach(img => {
+                    mediaHtml += '<img src="' + img + '" alt="تصویر">';
+                });
+                if (audios && audios.length > 0) {
+                    mediaHtml += '<div style="display:inline-flex; align-items:center; gap:6px; background:#fff3e0; color:#b75300; border:1px solid #ffcc80; padding:6px 12px; border-radius:8px; font-size:0.82rem; font-weight:bold;"><i class="fas fa-volume-up"></i> 🎙️ ' + audios.length + ' آڈیو بیان</div>';
+                }
+                mediaHtml += '</div>';
+            }
+
+            const cleanContent = (post.content || '').replace(/<[^>]+>/g, ' ').substring(0, 180);
+
+            html += '<div class="item-card">' +
+            '<div class="item-title"><i class="fas fa-file-alt"></i> ' + (idx + 1) + '. ' + (post.title || 'No Title') + '</div>' +
+            '<div class="item-content">' + cleanContent + (post.content && post.content.length > 180 ? '...' : '') + '</div>' +
+            mediaHtml +
+            '<div class="item-meta"><i class="far fa-calendar-alt"></i> ' + date + '</div>' +
+            '<div class="item-actions">' +
+                '<button onclick="editPost(\x27' + key + '\x27)" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> ایڈٹ</button>' +
+                '<button onclick="deletePost(\x27' + key + '\x27)" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> ڈیلیٹ</button>' +
+            '</div>' +
+        '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function renderPagesList(list) {
+        const container = document.getElementById('pagesList');
+        if (!container) return;
+        if (list.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-light); text-align:center; padding:20px;">کوئی صفحہ نہیں ملا۔</p>';
+            return;
+        }
+
+        let html = '';
+        list.forEach((item, idx) => {
+            const page = item.data;
+            const key = item.key;
+            const { ytVideos, localVideos, images } = extractAllMediaFromText(page.content || '');
+
+            let mediaHtml = '';
+            if (ytVideos.length > 0 || (localVideos && localVideos.length > 0) || images.length > 0) {
+                mediaHtml += '<div class="item-media-preview">';
+                ytVideos.slice(0, 3).forEach(v => {
+                    mediaHtml += '<div style="position:relative; display:inline-block;"><img src="' + v.thumb + '" alt="YouTube"><span style="position:absolute; bottom:4px; right:4px; background:#e74c3c; color:white; font-size:0.65rem; padding:1px 5px; border-radius:4px; font-weight:bold;">▶ یوٹیوب</span></div>';
+                });
+                if (localVideos) {
+                    localVideos.slice(0, 2).forEach(v => {
+                        mediaHtml += '<div style="position:relative; display:inline-block;"><video src="' + v + '" style="width:140px; height:85px; object-fit:cover; border-radius:8px; background:#000;" muted></video><span style="position:absolute; bottom:4px; right:4px; background:#1976d2; color:white; font-size:0.65rem; padding:1px 5px; border-radius:4px; font-weight:bold;">🎬 ویڈیو</span></div>';
+                    });
+                }
+                images.slice(0, 3).forEach(img => {
+                    mediaHtml += '<img src="' + img + '" alt="تصویر">';
+                });
+                if (audios && audios.length > 0) {
+                    mediaHtml += '<div style="display:inline-flex; align-items:center; gap:6px; background:#fff3e0; color:#b75300; border:1px solid #ffcc80; padding:6px 12px; border-radius:8px; font-size:0.82rem; font-weight:bold;"><i class="fas fa-volume-up"></i> 🎙️ ' + audios.length + ' آڈیو بیان</div>';
+                }
+                mediaHtml += '</div>';
+            }
+
+            const cleanContent = (page.content || '').replace(/<[^>]+>/g, ' ').substring(0, 180);
+
+            html += '<div class="item-card">' +
+            '<div class="item-title"><i class="fas fa-file-code"></i> ' + (idx + 1) + '. ' + (page.title || key) + '</div>' +
+            '<div class="item-content">' + cleanContent + (page.content && page.content.length > 180 ? '...' : '') + '</div>' +
+            mediaHtml +
+            '<div class="item-meta"><i class="fas fa-tag"></i> ID: <code>#' + key + '</code></div>' +
+            '<div class="item-actions">' +
+                '<button onclick="editPage(\x27' + key + '\x27)" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> ایڈٹ</button>' +
+                '<button onclick="deletePage(\x27' + key + '\x27)" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> ڈیلیٹ</button>' +
+                '<a href="index.html#' + key + '" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-external-link-alt"></i> ویب سائٹ پر دیکھیں</a>' +
+            '</div>' +
+        '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function filterPostsList() {
+        const q = (document.getElementById('searchPostsFilter').value || '').toLowerCase().trim();
+        if (!q) { renderPostsList(_cachedPosts); return; }
+        const filtered = _cachedPosts.filter(p => {
+            return (p.data.title || '').toLowerCase().includes(q) || (p.data.content || '').toLowerCase().includes(q);
+        });
+        renderPostsList(filtered);
+    }
+
+    function filterPagesList() {
+        const q = (document.getElementById('searchPagesFilter').value || '').toLowerCase().trim();
+        if (!q) { renderPagesList(_cachedPages); return; }
+        const filtered = _cachedPages.filter(p => {
+            return p.key.toLowerCase().includes(q) || (p.data.title || '').toLowerCase().includes(q) || (p.data.content || '').toLowerCase().includes(q);
+        });
+        renderPagesList(filtered);
+    }
+
+
+    // ========== EDIT / UPDATE MODAL SYSTEM ==========
+    function openEditModal(type, key) {
+        document.getElementById('editModalItemType').value = type;
+        document.getElementById('editModalItemKey').value = key;
+        
+        const typeLabel = document.getElementById('editModalTypeLabel');
+        const titleGroup = document.getElementById('editModalTitleGroup');
+        const mediaTools = document.getElementById('editModalMediaTools');
+        const titleInput = document.getElementById('editModalTitleInput');
+        const contentArea = document.getElementById('editModalContentTextarea');
+        const submitBtn = document.getElementById('editModalSubmitBtn');
+        const modal = document.getElementById('editItemModalOverlay');
+
+        if (type === 'announcement') {
+            typeLabel.textContent = 'اہم اعلان';
+            titleGroup.style.display = 'none';
+            mediaTools.style.display = 'none';
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> اعلان اپڈیٹ کریں (Update Announcement)';
+            
+            database.ref('announcements/' + key).once('value').then((snap) => {
+                const data = snap.val() || {};
+                contentArea.value = data.text || '';
+                modal.classList.add('active');
+            }).catch(err => {
+                alert('❌ خرابی: ' + err.message);
+            });
+        } else if (type === 'post') {
+            typeLabel.textContent = 'پوسٹ';
+            titleGroup.style.display = 'block';
+            mediaTools.style.display = 'flex';
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> پوسٹ اپڈیٹ کریں (Update Post)';
+            
+            database.ref('posts/' + key).once('value').then((snap) => {
+                const data = snap.val() || {};
+                titleInput.value = data.title || '';
+                contentArea.value = data.content || '';
+                modal.classList.add('active');
+            }).catch(err => {
+                alert('❌ خرابی: ' + err.message);
+            });
+        } else if (type === 'page') {
+            typeLabel.textContent = 'صفحہ (Page #' + key + ')';
+            titleGroup.style.display = 'block';
+            mediaTools.style.display = 'flex';
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> صفحہ اپڈیٹ کریں (Update Page)';
+            
+            database.ref('pages/' + key).once('value').then((snap) => {
+                const data = snap.val() || {};
+                titleInput.value = data.title || '';
+                contentArea.value = data.content || '';
+                modal.classList.add('active');
+            }).catch(err => {
+                alert('❌ خرابی: ' + err.message);
+            });
+        }
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editItemModalOverlay');
+        if (modal) modal.classList.remove('active');
+    }
+
+    function saveItemUpdate() {
+        const type = document.getElementById('editModalItemType').value;
+        const key = document.getElementById('editModalItemKey').value;
+        const title = document.getElementById('editModalTitleInput').value.trim();
+        const content = document.getElementById('editModalContentTextarea').value.trim();
+        
+        if (type === 'announcement') {
+            if (!content) {
+                alert('❌ اعلان کا متن خالی نہیں ہو سکتا۔');
+                return;
+            }
+            database.ref('announcements/' + key).update({
+                text: content,
+                timestamp: Date.now()
+            }).then(() => {
+                alert('✅ اعلان کامیابی سے اپڈیٹ (Update) ہو گیا اور ویب سائٹ پر تبدیل ہو گیا!');
+                closeEditModal();
+                loadAnnouncements();
+                loadDashboard();
+            }).catch((err) => {
+                alert('❌ اپڈیٹ میں خرابی: ' + err.message);
+            });
+        } else if (type === 'post') {
+            if (!title) {
+                alert('❌ پوسٹ کا عنوان درج فرمائیں۔');
+                return;
+            }
+            database.ref('posts/' + key).update({
+                title: title,
+                content: content,
+                timestamp: Date.now()
+            }).then(() => {
+                alert('✅ پوسٹ کامیابی سے اپڈیٹ (Update) ہو گئی!');
+                closeEditModal();
+                loadPostsAndPages();
+                loadDashboard();
+            }).catch((err) => {
+                alert('❌ اپڈیٹ میں خرابی: ' + err.message);
+            });
+        } else if (type === 'page') {
+            if (!title) {
+                alert('❌ صفحہ کا عنوان درج فرمائیں۔');
+                return;
+            }
+            database.ref('pages/' + key).update({
+                title: title,
+                content: content,
+                timestamp: Date.now()
+            }).then(() => {
+                alert('✅ صفحہ کامیابی سے اپڈیٹ (Update) ہو گیا اور ویب سائٹ پر تبدیل ہو گیا!');
+                closeEditModal();
+                loadPostsAndPages();
+                loadDashboard();
+            }).catch((err) => {
+                alert('❌ اپڈیٹ میں خرابی: ' + err.message);
+            });
+        }
+    }
+
+    // Alias handlers
+    function editPost(key) { openEditModal('post', key); }
+    function editPage(key) { openEditModal('page', key); }
+
+    // ========== OLD EDIT STUB ==========
+    function old_editPost(key) {
+        database.ref('posts/' + key).once('value').then((snapshot) => {
+            const post = snapshot.val();
+            if (!post) return;
+            const newTitle = prompt('پوسٹ کا نیا عنوان:', post.title || '');
+            if (newTitle === null) return;
+            const newContent = prompt('پوسٹ کا نیا مواد (تحریر یا یوٹیوب لنکس):', post.content || '');
+            if (newContent === null) return;
+            database.ref('posts/' + key).update({ title: newTitle, content: newContent, timestamp: Date.now() })
+                .then(() => { alert('✅ پوسٹ کامیابی سے اپڈیٹ ہو گئی!'); loadPostsAndPages(); loadDashboard(); })
+                .catch((error) => { alert('❌ خرابی: ' + error.message); });
+        });
+    }
+
+    // ========== DELETE POST ==========
+    function deletePost(key) {
+        if (!confirm('کیا آپ واقعی اس پوسٹ کو حذف کرنا چاہتے ہیں؟')) return;
+        database.ref('posts/' + key).remove()
+            .then(() => { alert('✅ پوسٹ حذف ہو گئی!'); loadPostsAndPages(); loadDashboard(); })
+            .catch((error) => { alert('❌ خرابی: ' + error.message); });
+    }
+
+    // ========== EDIT PAGE ==========
+    function editPage(key) {
+        database.ref('pages/' + key).once('value').then((snapshot) => {
+            const page = snapshot.val();
+            if (!page) return;
+            const newTitle = prompt('صفحہ کا نیا عنوان:', page.title || '');
+            if (newTitle === null) return;
+            const newContent = prompt('صفحہ کا نیا مواد (HTML یا لنکس):', page.content || '');
+            if (newContent === null) return;
+            database.ref('pages/' + key).update({ title: newTitle, content: newContent, timestamp: Date.now() })
+                .then(() => { alert('✅ صفحہ کامیابی سے اپڈیٹ ہو گیا!'); loadPostsAndPages(); loadDashboard(); })
+                .catch((error) => { alert('❌ خرابی: ' + error.message); });
+        });
+    }
+
+    // ========== DELETE PAGE ==========
+    function deletePage(key) {
+        if (!confirm('کیا آپ واقعی اس صفحہ کو حذف کرنا چاہتے ہیں؟')) return;
+        database.ref('pages/' + key).remove()
+            .then(() => { alert('✅ صفحہ حذف ہو گیا!'); loadPostsAndPages(); loadDashboard(); })
+            .catch((error) => { alert('❌ خرابی: ' + error.message); });
+    }
+
+    if (!auth.currentUser) {
+        setTimeout(startAutoFillTimer, 500);
+    }
+</script>
+
+</body>
+</html>
